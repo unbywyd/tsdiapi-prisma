@@ -10,6 +10,7 @@ const types_1 = require("./types");
 const hooks_1 = require("./hooks");
 let client = null;
 const _createPrismaInstance = (prismaOptions) => {
+    console.log("Creating prisma instance");
     if (client) {
         return client;
     }

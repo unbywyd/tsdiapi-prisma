@@ -62,8 +62,8 @@ export function PrismaHooks(): ClassDecorator {
 }
 
 export function Operation<
+    O extends PrismaOperation,
     M extends string,
-    O extends PrismaOperation
 >(
     operation: O,
     model?: M
