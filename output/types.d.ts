@@ -1,4 +1,3 @@
-import "reflect-metadata";
 /** Possible Prisma operations */
 export declare enum PrismaOperation {
     FindUnique = "findUnique",

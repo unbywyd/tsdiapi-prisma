@@ -1,34 +1,23 @@
-import type { Application, Request, Response } from 'express';
-import { Container, Service } from 'typedi';
 import type { AppPlugin, AppContext } from 'tsdiapi-server';
-import { Prisma } from "@prisma/client";
+import { _createPrismaInstance } from './client';
 
+export * from './types';
+export * from './hooks';
 
-@Service()
-export class LibraryService {
-    private value: string = 'Initial value from library';
-
-    setValue(newValue: string): void {
-        this.value = newValue;
-    }
-
-    getValue(): string {
-        return this.value;
-    }
-}
-
-const container = Container;
-export { container };
-
+import client from './client';
+export { client };
 
 export type PluginOptions = {
     prismaOptions: any,
 }
 
 const defaultConfig: Partial<PluginOptions> = {
-
+    prismaOptions: {
+        transactionOptions: {
+            timeout: 10000,
+        }
+    }
 }
-
 
 class App implements AppPlugin {
     name = 'tsdiapi-prisma';
@@ -37,13 +26,11 @@ class App implements AppPlugin {
 
     constructor(config?: PluginOptions) {
         this.config = { ...config };
+        _createPrismaInstance(this.config.prismaOptions || defaultConfig);
     }
 
     async onInit(ctx: AppContext) {
         this.context = ctx;
-    }
-    async beforeStart(ctx: AppContext) {
-
     }
 }
 

@@ -10,7 +10,6 @@ exports.DbEventController = exports.PrismaEventOperation = exports.PrismaOperati
 exports.generateEventString = generateEventString;
 exports.DbBeforeListener = DbBeforeListener;
 exports.DbAfterListener = DbAfterListener;
-require("reflect-metadata");
 const typedi_1 = require("typedi");
 /** Possible Prisma operations */
 var PrismaOperation;

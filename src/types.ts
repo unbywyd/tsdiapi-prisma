@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { Service, Container } from "typedi";
 
 /** Possible Prisma operations */

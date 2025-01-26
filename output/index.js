@@ -1,41 +1,46 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.container = exports.LibraryService = void 0;
+exports.client = void 0;
 exports.default = default_1;
-const typedi_1 = require("typedi");
-let LibraryService = class LibraryService {
-    value = 'Initial value from library';
-    setValue(newValue) {
-        this.value = newValue;
-    }
-    getValue() {
-        return this.value;
+const client_1 = require("./client");
+__exportStar(require("./types"), exports);
+__exportStar(require("./hooks"), exports);
+const client_2 = __importDefault(require("./client"));
+exports.client = client_2.default;
+const defaultConfig = {
+    prismaOptions: {
+        transactionOptions: {
+            timeout: 10000,
+        }
     }
 };
-exports.LibraryService = LibraryService;
-exports.LibraryService = LibraryService = __decorate([
-    (0, typedi_1.Service)()
-], LibraryService);
-const container = typedi_1.Container;
-exports.container = container;
-const defaultConfig = {};
 class App {
     name = 'tsdiapi-prisma';
     config;
     context;
     constructor(config) {
         this.config = { ...config };
+        (0, client_1._createPrismaInstance)(this.config.prismaOptions || defaultConfig);
     }
     async onInit(ctx) {
         this.context = ctx;
-    }
-    async beforeStart(ctx) {
     }
 }
 function default_1(config) {
