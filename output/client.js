@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.client = exports._createPrismaInstance = void 0;
 const client_1 = require("@prisma/client");
 const typedi_1 = __importDefault(require("typedi"));
-const types_1 = require("./types");
+const events_1 = require("./events");
 const hooks_1 = require("./hooks");
 let client = null;
 exports.client = client;
@@ -28,8 +28,8 @@ const _createPrismaInstance = (prismaOptions) => {
                     query,
                     operation,
                 };
-                const controller = typedi_1.default.get(types_1.DbEventController);
-                const beforeEvent = (0, types_1.generateEventString)(model, operation, types_1.PrismaEventOperation.Before);
+                const controller = typedi_1.default.get(events_1.DbEventController);
+                const beforeEvent = (0, events_1.generateEventString)(model, operation, events_1.PrismaEventOperation.Before);
                 controller.emit(beforeEvent, payload);
                 let result = null;
                 try {
@@ -46,7 +46,7 @@ const _createPrismaInstance = (prismaOptions) => {
                         operation,
                         result,
                     };
-                    const afterEvent = (0, types_1.generateEventString)(model, operation, types_1.PrismaEventOperation.After);
+                    const afterEvent = (0, events_1.generateEventString)(model, operation, events_1.PrismaEventOperation.After);
                     controller.emit(afterEvent, afterPayload);
                 }
                 catch (e) {

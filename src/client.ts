@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import Container from "typedi";
-import { DbEventController, generateEventString, PrismaEventOperation, PrismaEventPayload } from "./types";
+import { DbEventController, generateEventString, PrismaEventOperation, PrismaEventPayload } from "./events";
 import { prismaHookRegistry } from "./hooks";
 let client: PrismaClient | null = null;
 

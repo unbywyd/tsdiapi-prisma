@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import Container, { Service } from "typedi";
-import { PrismaHookPayload, PrismaOperation } from "./types";
+import { PrismaHookPayload, PrismaOperation } from "./events";
 
 const PRISMA_HOOKS_METADATA = Symbol("PRISMA_HOOKS_METADATA");
 const OPERATION_METADATA = Symbol("OPERATION_METADATA");
