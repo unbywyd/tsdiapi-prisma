@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LibraryService = void 0;
+exports.container = exports.LibraryService = void 0;
 exports.default = default_1;
 const typedi_1 = require("typedi");
 let LibraryService = class LibraryService {
@@ -22,6 +22,8 @@ exports.LibraryService = LibraryService;
 exports.LibraryService = LibraryService = __decorate([
     (0, typedi_1.Service)()
 ], LibraryService);
+const container = typedi_1.Container;
+exports.container = container;
 const defaultConfig = {};
 class App {
     name = 'tsdiapi-prisma';

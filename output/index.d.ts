@@ -1,9 +1,12 @@
+import { Container } from 'typedi';
 import type { AppPlugin, AppContext } from 'tsdiapi-server';
 export declare class LibraryService {
     private value;
     setValue(newValue: string): void;
     getValue(): string;
 }
+declare const container: typeof Container;
+export { container };
 export type PluginOptions = {
     prismaOptions: any;
 };
@@ -16,5 +19,4 @@ declare class App implements AppPlugin {
     beforeStart(ctx: AppContext): Promise<void>;
 }
 export default function (config?: PluginOptions): App;
-export {};
 //# sourceMappingURL=index.d.ts.map

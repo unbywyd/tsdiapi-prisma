@@ -17,6 +17,9 @@ export class LibraryService {
     }
 }
 
+const container = Container;
+export { container };
+
 
 export type PluginOptions = {
     prismaOptions: any,
