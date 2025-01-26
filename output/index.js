@@ -29,14 +29,17 @@ const defaultConfig = {
         transactionOptions: {
             timeout: 10000,
         }
-    }
+    },
+    globHooksPath: "*.prisma{.ts,.js}"
 };
 class App {
     name = 'tsdiapi-prisma';
     config;
     context;
+    bootstrapFilesGlobPath;
     constructor(config) {
         this.config = { ...config };
+        this.bootstrapFilesGlobPath = this.config.globHooksPath || defaultConfig.globHooksPath;
         (0, client_1._createPrismaInstance)(this.config.prismaOptions || defaultConfig);
     }
     async onInit(ctx) {

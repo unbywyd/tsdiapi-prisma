@@ -9,6 +9,7 @@ export { client };
 
 export type PluginOptions = {
     prismaOptions: any,
+    globHooksPath: string;
 }
 
 const defaultConfig: Partial<PluginOptions> = {
@@ -16,16 +17,18 @@ const defaultConfig: Partial<PluginOptions> = {
         transactionOptions: {
             timeout: 10000,
         }
-    }
+    },
+    globHooksPath: "*.prisma{.ts,.js}"
 }
 
 class App implements AppPlugin {
     name = 'tsdiapi-prisma';
     config: PluginOptions;
     context: AppContext;
-
+    bootstrapFilesGlobPath: string;
     constructor(config?: PluginOptions) {
         this.config = { ...config };
+        this.bootstrapFilesGlobPath = this.config.globHooksPath || defaultConfig.globHooksPath;
         _createPrismaInstance(this.config.prismaOptions || defaultConfig);
     }
 
