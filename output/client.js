@@ -3,18 +3,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._createPrismaInstance = void 0;
+exports.client = exports._createPrismaInstance = void 0;
 const client_1 = require("@prisma/client");
 const typedi_1 = __importDefault(require("typedi"));
 const types_1 = require("./types");
 const hooks_1 = require("./hooks");
 let client = null;
+exports.client = client;
 const _createPrismaInstance = (prismaOptions) => {
     console.log("Creating prisma instance");
     if (client) {
         return client;
     }
-    client = new client_1.PrismaClient({
+    exports.client = client = new client_1.PrismaClient({
         transactionOptions: prismaOptions || {
             timeout: 10000,
         }
@@ -79,5 +80,4 @@ const _createPrismaInstance = (prismaOptions) => {
     return client;
 };
 exports._createPrismaInstance = _createPrismaInstance;
-exports.default = client;
 //# sourceMappingURL=client.js.map

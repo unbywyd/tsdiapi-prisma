@@ -3,8 +3,7 @@ import { _createPrismaInstance } from './client';
 
 export * from './types';
 export * from './hooks';
-
-import client from './client';
+import { client } from './client';
 export { client };
 
 export type PluginOptions = {

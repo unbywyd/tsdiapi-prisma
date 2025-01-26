@@ -89,4 +89,4 @@ export const _createPrismaInstance = (prismaOptions: any) => {
 }
 
 
-export default client;
+export { client };
