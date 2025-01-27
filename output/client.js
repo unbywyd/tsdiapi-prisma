@@ -11,7 +11,6 @@ const hooks_1 = require("./hooks");
 let client = null;
 exports.client = client;
 const _createPrismaInstance = (prismaOptions) => {
-    console.log("Creating prisma instance");
     if (client) {
         return client;
     }

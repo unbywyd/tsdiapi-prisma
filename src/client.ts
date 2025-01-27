@@ -5,7 +5,6 @@ import { prismaHookRegistry } from "./hooks";
 let client: PrismaClient | null = null;
 
 export const _createPrismaInstance = (prismaOptions: any) => {
-    console.log("Creating prisma instance");
     if (client) {
         return client;
     }
