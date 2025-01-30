@@ -1,9 +1,13 @@
 {
-  "name": "tsdiapi-prisma",
+  "name": "@tsdiapi/prisma",
   "description": "TSDIAPI-Prisma is a plugin for the TSDIAPI-Server framework that integrates Prisma ORM with event and hook functionality for database operations.",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha.1",
   "main": "output/index.js",
   "types": "output/index.d.ts",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc"
   },
@@ -28,27 +32,27 @@
     "database plugin"
   ],
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
+    "@tsdiapi/server": "^0.0.1-alpha",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.10",
-    "typescript": "^5.7.2",
-    "tsdiapi-server": "github:unbywyd/tsdiapi-server#master"
+    "typescript": "^5.7.2"
   },
   "peerDependencies": {
-    "typedi": "^0.10.0",
-    "prisma": "^6.2.1",
     "@prisma/client": "^6.2.1",
-    "reflect-metadata": "^0.2.2"
+    "prisma": "^6.2.1",
+    "reflect-metadata": "^0.2.2",
+    "typedi": "^0.10.0",
+    "prisma-class-dto-generator": "^6.3.1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unbywyd/TSDIAPI-prisma"
+    "url": "git+https://github.com/unbywyd/tsdiapi-prisma"
   },
   "bugs": {
-    "url": "https://github.com/unbywyd/TSDIAPI-prisma/issues"
+    "url": "https://github.com/unbywyd/tsdiapi-prisma/issues"
   },
-  "homepage": "https://github.com/unbywyd/TSDIAPI-prisma#readme",
+  "homepage": "https://github.com/unbywyd/tsdiapi-prisma#readme",
   "files": [
     "output/",
     "README.md",

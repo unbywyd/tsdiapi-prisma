@@ -27,7 +27,7 @@ const defaultConfig = {
             timeout: 10000,
         }
     },
-    globPrismaPath: "*.prisma{.ts,.js}"
+    autoloadGlobPath: "*.prisma{.ts,.js}"
 };
 class App {
     name = 'tsdiapi-prisma';
@@ -36,7 +36,7 @@ class App {
     bootstrapFilesGlobPath;
     constructor(config) {
         this.config = { ...config };
-        this.bootstrapFilesGlobPath = this.config.globPrismaPath || defaultConfig.globPrismaPath;
+        this.bootstrapFilesGlobPath = this.config.autoloadGlobPath || defaultConfig.autoloadGlobPath;
         (0, client_1._createPrismaInstance)(this.config.prismaOptions || defaultConfig);
     }
     async onInit(ctx) {

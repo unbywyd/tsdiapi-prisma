@@ -1,6 +1,5 @@
-import type { AppPlugin, AppContext } from 'tsdiapi-server';
+import type { AppPlugin, AppContext } from '@tsdiapi/server';
 import { _createPrismaInstance } from './client';
-
 export * from './events';
 export * from './hooks';
 import { client } from './client';
@@ -8,7 +7,7 @@ export { client };
 
 export type PluginOptions = {
     prismaOptions: any,
-    globPrismaPath: string;
+    autoloadGlobPath: string;
 }
 
 const defaultConfig: Partial<PluginOptions> = {
@@ -17,7 +16,7 @@ const defaultConfig: Partial<PluginOptions> = {
             timeout: 10000,
         }
     },
-    globPrismaPath: "*.prisma{.ts,.js}"
+    autoloadGlobPath: "*.prisma{.ts,.js}"
 }
 
 class App implements AppPlugin {
@@ -27,10 +26,9 @@ class App implements AppPlugin {
     bootstrapFilesGlobPath: string;
     constructor(config?: PluginOptions) {
         this.config = { ...config };
-        this.bootstrapFilesGlobPath = this.config.globPrismaPath || defaultConfig.globPrismaPath;
+        this.bootstrapFilesGlobPath = this.config.autoloadGlobPath || defaultConfig.autoloadGlobPath;
         _createPrismaInstance(this.config.prismaOptions || defaultConfig);
     }
-
     async onInit(ctx: AppContext) {
         this.context = ctx;
     }

@@ -1,11 +1,11 @@
-import type { AppPlugin, AppContext } from 'tsdiapi-server';
+import type { AppPlugin, AppContext } from '@tsdiapi/server';
 export * from './events';
 export * from './hooks';
 import { client } from './client';
 export { client };
 export type PluginOptions = {
     prismaOptions: any;
-    globPrismaPath: string;
+    autoloadGlobPath: string;
 };
 declare class App implements AppPlugin {
     name: string;
