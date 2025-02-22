@@ -23,8 +23,47 @@ npm install @tsdiapi/prisma
 Or use the CLI to add the plugin:
 
 ```bash
-tsdiapi add plugin prisma
+tsdiapi plugins add prisma
 ```
+
+### 📌 Code Generation
+
+The **TSDIAPI-Prisma** plugin includes code generators to streamline the creation of Prisma event listeners and hooks. Use the `tsdiapi` CLI to generate these files automatically.
+
+| Name    | Description                                                           |
+| ------- | --------------------------------------------------------------------- |
+| `event` | Generates a Prisma event listener for a specific model and operation. |
+| `hook`  | Generates a Prisma hook to modify query arguments before execution.   |
+
+#### 📌 Generate a Prisma Event Listener
+
+This generator creates an event listener that triggers **before** and **after** a specified Prisma operation. It will prompt for:
+
+- **Model Name** (e.g., `User`, `Post`)
+- **Prisma Operation** (e.g., `FindUnique`, `Create`, `Update`)
+
+Run the command:
+
+```bash
+tsdiapi generate prisma event
+```
+
+---
+
+#### 📌 Generate a Prisma Hook
+
+This generator creates a Prisma hook that allows **modification of query arguments** before execution. It will prompt for:
+
+- **Model Name** (e.g., `User`, `Order`)
+- **Prisma Operation** (e.g., `Create`, `Update`, `FindMany`)
+
+Run the command:
+
+```bash
+tsdiapi generate prisma hook
+```
+
+✅ **Easily generate Prisma event listeners and hooks with just one command!**
 
 ---
 

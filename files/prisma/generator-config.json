@@ -1,0 +1,14 @@
+{
+    "excludeModels": [],
+    "input": {
+        "excludeFields": [
+            "id",
+            "createdAt",
+            "updatedAt"
+        ],
+        "includeRelations": false
+    },
+    "output": {
+        "includeRelations": true
+    }
+}

@@ -1,6 +1,10 @@
 {
   "name": "@tsdiapi/prisma",
   "description": "A TSDIAPI plugin for database management using Prisma ORM.",
+  "postInstall": "npx prisma init",
+  "provideScripts": {
+    "postinstall": "prisma generate"
+  },
   "variables": [
     {
       "name": "DATABASE_TYPE",
@@ -30,5 +34,127 @@
         "required": true
       }
     }
+  ],
+  "files": [
+    {
+      "source": "files/prisma/*.*",
+      "destination": "prisma/"
+    },
+    {
+      "source": "files/src/*.ts",
+      "destination": "src/"
+    }
+  ],
+  "generators": [
+    {
+      "name": "event",
+      "description": "Generate a Prisma event listener.",
+      "files": [
+        {
+          "source": "generators/event/*.*",
+          "destination": ".",
+          "isHandlebarsTemplate": true
+        }
+      ],
+      "args": [
+        {
+          "name": "modelName",
+          "description": "Prisma model name (e.g., 'User', 'Order').",
+          "inquirer": {
+            "type": "input",
+            "message": "Enter the Prisma model name:"
+          },
+          "validate": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+            "errorMessage": "Model name must be a valid identifier."
+          },
+          "transform": "capitalize(x)"
+        },
+        {
+          "name": "operation",
+          "description": "Prisma operation type.",
+          "inquirer": {
+            "type": "list",
+            "message": "Select the Prisma operation:",
+            "choices": [
+              "FindUnique",
+              "FindUniqueOrThrow",
+              "FindFirst",
+              "FindFirstOrThrow",
+              "FindMany",
+              "Create",
+              "CreateMany",
+              "Delete",
+              "Update",
+              "DeleteMany",
+              "UpdateMany",
+              "Upsert",
+              "Aggregate",
+              "GroupBy",
+              "Count"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "hook",
+      "description": "Generate a Prisma operation hook.",
+      "files": [
+        {
+          "source": "generators/hook/*.*",
+          "destination": ".",
+          "isHandlebarsTemplate": true
+        }
+      ],
+      "args": [
+        {
+          "name": "modelName",
+          "description": "Prisma model name (e.g., 'User', 'Order').",
+          "inquirer": {
+            "type": "input",
+            "message": "Enter the Prisma model name:"
+          },
+          "validate": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+            "errorMessage": "Model name must be a valid identifier."
+          },
+          "transform": "capitalize(x)"
+        },
+        {
+          "name": "operation",
+          "description": "Prisma operation type.",
+          "inquirer": {
+            "type": "list",
+            "message": "Select the Prisma operation:",
+            "choices": [
+              "FindUnique",
+              "FindUniqueOrThrow",
+              "FindFirst",
+              "FindFirstOrThrow",
+              "FindMany",
+              "Create",
+              "CreateMany",
+              "Delete",
+              "Update",
+              "DeleteMany",
+              "UpdateMany",
+              "Upsert",
+              "Aggregate",
+              "GroupBy",
+              "Count"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "postMessages": [
+    "✅ Prisma setup complete!",
+    "❗❗ Open 'prisma/schema.prisma' and define your models! ❗❗",
+    "📌 Use 'npx prisma generate' to regenerate the Prisma client.",
+    "⚡ Run 'npx prisma migrate dev' to apply migrations."
   ]
 }
