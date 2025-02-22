@@ -2,6 +2,16 @@
   "name": "@tsdiapi/prisma",
   "description": "A TSDIAPI plugin for database management using Prisma ORM.",
   "postInstall": "npx prisma init",
+  "afterInstall": "npx prisma generate",
+  "postFileModifications": [
+    {
+      "path": "prisma/schema.prisma",
+      "mode": "append",
+      "match": "prisma-class-dto-generator",
+      "expected": false,
+      "content": "generator dto_generator {\n    provider = \"node node_modules/prisma-class-dto-generator\"\n    output   = \"../src/generated_prisma_dto\"\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n}"
+    }
+  ],
   "provideScripts": {
     "postinstall": "prisma generate"
   },
