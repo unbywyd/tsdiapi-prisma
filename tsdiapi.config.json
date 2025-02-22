@@ -1,0 +1,34 @@
+{
+  "name": "@tsdiapi/prisma",
+  "description": "A TSDIAPI plugin for database management using Prisma ORM.",
+  "variables": [
+    {
+      "name": "DATABASE_TYPE",
+      "type": "string",
+      "default": "PostgreSQL",
+      "configurable": true,
+      "description": "Select your database type",
+      "inquirer": {
+        "type": "list",
+        "message": "Choose your database type:",
+        "choices": [
+          "PostgreSQL",
+          "MySQL",
+          "SQLite",
+          "SQL Server"
+        ]
+      }
+    },
+    {
+      "name": "DATABASE_URL",
+      "type": "string",
+      "default": "",
+      "configurable": true,
+      "description": "Database connection string",
+      "inquirer": {
+        "message": "Enter your database connection string:",
+        "required": true
+      }
+    }
+  ]
+}
