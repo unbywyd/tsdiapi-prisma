@@ -9,7 +9,7 @@
       "mode": "append",
       "match": "prisma-class-dto-generator",
       "expected": false,
-      "content": "generator dto_generator {\n    provider = \"node node_modules/prisma-class-dto-generator\"\n    output   = \"../src/generated_prisma_dto\"\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n}"
+      "content": "generator dto_generator {\n    provider = \"node node_modules/prisma-class-dto-generator\"\n    output   = \"../src/prisma-models\"\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n}"
     }
   ],
   "provideScripts": {
