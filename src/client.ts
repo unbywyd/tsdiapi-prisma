@@ -63,7 +63,6 @@ export const _createPrismaInstance = (prismaOptions: any) => {
 
     process.on("SIGINT", () => {
         client.$disconnect().then(() => {
-            console.log("Disconnect from database");
         }).finally(() => {
             process.exit();
         });
@@ -71,7 +70,6 @@ export const _createPrismaInstance = (prismaOptions: any) => {
 
     process.on("SIGTERM", () => {
         client.$disconnect().then(() => {
-            console.log("Disconnect from database");
         }).finally(() => {
             process.exit();
         });
@@ -79,7 +77,6 @@ export const _createPrismaInstance = (prismaOptions: any) => {
 
     process.on("exit", async () => {
         client.$disconnect().then(() => {
-            console.log("Disconnect from database");
         }).finally(() => {
             process.exit();
         });

@@ -57,21 +57,18 @@ const _createPrismaInstance = (prismaOptions) => {
     });
     process.on("SIGINT", () => {
         client.$disconnect().then(() => {
-            console.log("Disconnect from database");
         }).finally(() => {
             process.exit();
         });
     });
     process.on("SIGTERM", () => {
         client.$disconnect().then(() => {
-            console.log("Disconnect from database");
         }).finally(() => {
             process.exit();
         });
     });
     process.on("exit", async () => {
         client.$disconnect().then(() => {
-            console.log("Disconnect from database");
         }).finally(() => {
             process.exit();
         });
