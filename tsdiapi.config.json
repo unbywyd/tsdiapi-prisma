@@ -2,7 +2,9 @@
   "name": "@tsdiapi/prisma",
   "description": "A TSDIAPI plugin for database management using Prisma ORM.",
   "postInstall": "npx prisma init",
-  "afterInstall": "npx prisma generate",
+  "afterInstall": {
+    "command": "npx prisma generate"
+  },
   "postFileModifications": [
     {
       "path": "prisma/schema.prisma",
@@ -106,6 +108,9 @@
             ]
           }
         }
+      ],
+      "postMessages": [
+        "✅ Event listener generated successfully!"
       ]
     },
     {
@@ -158,6 +163,9 @@
             ]
           }
         }
+      ],
+      "postMessages": [
+        "✅ Operation hook generated successfully!"
       ]
     }
   ],
