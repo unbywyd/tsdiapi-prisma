@@ -2,18 +2,19 @@
   "name": "@tsdiapi/prisma",
   "description": "A TSDIAPI plugin for database management using Prisma ORM.",
   "postInstall": "npx prisma init",
-  "afterInstall": {
-    "command": "npx prisma generate"
+  "prisma": {
+    "required": true,
+    "scripts": [
+      {
+        "command": "ADD GENERATOR dto_generator ({ provider='node node_modules/prisma-class-dto-generator', output='../src/prisma-models' });",
+        "description": "Add Prisma class-DTO generator."
+      },
+      {
+        "command": "ADD MODEL Tsdiapi ({version Int});",
+        "description": "Add a sample Prisma model."
+      }
+    ]
   },
-  "postFileModifications": [
-    {
-      "path": "prisma/schema.prisma",
-      "mode": "append",
-      "match": "prisma-class-dto-generator",
-      "expected": false,
-      "content": "generator dto_generator {\n    provider = \"node node_modules/prisma-class-dto-generator\"\n    output   = \"../src/prisma-models\"\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n}"
-    }
-  ],
   "provideScripts": {
     "postinstall": "prisma generate"
   },
