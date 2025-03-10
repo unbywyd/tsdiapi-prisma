@@ -1,7 +1,7 @@
 {
   "name": "@tsdiapi/prisma",
   "description": "TSDIAPI-Prisma is a plugin for the TSDIAPI-Server framework that integrates Prisma ORM with event and hook functionality for database operations.",
-  "version": "0.0.2-alpha.3",
+  "version": "0.1.0",
   "main": "output/index.js",
   "types": "output/index.d.ts",
   "private": false,
@@ -39,7 +39,7 @@
     "prisma-class-dto-generator": "^6.5.2"
   },
   "devDependencies": {
-    "@tsdiapi/server": "^0.0.2-alpha",
+    "@tsdiapi/server": "^0.1.0",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.10",
     "typescript": "^5.7.2"
