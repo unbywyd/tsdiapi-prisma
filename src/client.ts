@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import Container from "typedi";
-import { DbEventController, generateEventString, PrismaEventOperation, PrismaEventPayload } from "./events";
-import { prismaHookRegistry } from "./hooks";
+import { Container } from "typedi";
+import { DbEventController, generateEventString, PrismaEventOperation, PrismaEventPayload } from "./events.js";
+import { prismaHookRegistry } from "./hooks.js";
 let client: PrismaClient | null = null;
 
 export const _createPrismaInstance = (prismaOptions: any) => {

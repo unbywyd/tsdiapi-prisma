@@ -1,18 +1,12 @@
-"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DbEventController = exports.PrismaEventOperation = exports.PrismaOperation = void 0;
-exports.generateEventString = generateEventString;
-exports.DbBeforeListener = DbBeforeListener;
-exports.DbAfterListener = DbAfterListener;
-const typedi_1 = require("typedi");
+import { Service, Container } from "typedi";
 /** Possible Prisma operations */
-var PrismaOperation;
+export var PrismaOperation;
 (function (PrismaOperation) {
     PrismaOperation["FindUnique"] = "findUnique";
     PrismaOperation["FindUniqueOrThrow"] = "findUniqueOrThrow";
@@ -29,15 +23,15 @@ var PrismaOperation;
     PrismaOperation["Aggregate"] = "aggregate";
     PrismaOperation["GroupBy"] = "groupBy";
     PrismaOperation["Count"] = "count";
-})(PrismaOperation || (exports.PrismaOperation = PrismaOperation = {}));
+})(PrismaOperation || (PrismaOperation = {}));
 /** Distinguishes hooks before and after query execution */
-var PrismaEventOperation;
+export var PrismaEventOperation;
 (function (PrismaEventOperation) {
     PrismaEventOperation["Before"] = "before";
     PrismaEventOperation["After"] = "after";
-})(PrismaEventOperation || (exports.PrismaEventOperation = PrismaEventOperation = {}));
+})(PrismaEventOperation || (PrismaEventOperation = {}));
 /** Generates an event string for dispatching listeners */
-function generateEventString(modelName, operation, eventOperation) {
+export function generateEventString(modelName, operation, eventOperation) {
     return `db_${eventOperation}_${operation}_${modelName}`;
 }
 let DbEventController = class DbEventController {
@@ -56,26 +50,26 @@ let DbEventController = class DbEventController {
         }
     }
 };
-exports.DbEventController = DbEventController;
-exports.DbEventController = DbEventController = __decorate([
-    (0, typedi_1.Service)()
+DbEventController = __decorate([
+    Service()
 ], DbEventController);
-function DbBeforeListener(model, operation) {
+export { DbEventController };
+export function DbBeforeListener(model, operation) {
     return function (target, propertyKey, descriptor) {
         const originalMethod = descriptor.value;
         const eventName = generateEventString(model, operation, PrismaEventOperation.Before);
-        typedi_1.Container.get(DbEventController).on(eventName, (payload) => {
-            const instance = typedi_1.Container.get(target.constructor);
+        Container.get(DbEventController).on(eventName, (payload) => {
+            const instance = Container.get(target.constructor);
             return originalMethod.call(instance, payload);
         });
     };
 }
-function DbAfterListener(model, operation) {
+export function DbAfterListener(model, operation) {
     return function (target, propertyKey, descriptor) {
         const originalMethod = descriptor.value;
         const eventName = generateEventString(model, operation, PrismaEventOperation.After);
-        typedi_1.Container.get(DbEventController).on(eventName, (payload) => {
-            const instance = typedi_1.Container.get(target.constructor);
+        Container.get(DbEventController).on(eventName, (payload) => {
+            const instance = Container.get(target.constructor);
             return originalMethod.call(instance, payload);
         });
     };

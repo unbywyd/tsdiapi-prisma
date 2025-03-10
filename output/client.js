@@ -1,20 +1,13 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.client = exports._createPrismaInstance = void 0;
-const client_1 = require("@prisma/client");
-const typedi_1 = __importDefault(require("typedi"));
-const events_1 = require("./events");
-const hooks_1 = require("./hooks");
+import { PrismaClient } from "@prisma/client";
+import { Container } from "typedi";
+import { DbEventController, generateEventString, PrismaEventOperation } from "./events.js";
+import { prismaHookRegistry } from "./hooks.js";
 let client = null;
-exports.client = client;
-const _createPrismaInstance = (prismaOptions) => {
+export const _createPrismaInstance = (prismaOptions) => {
     if (client) {
         return client;
     }
-    exports.client = client = new client_1.PrismaClient({
+    client = new PrismaClient({
         transactionOptions: prismaOptions || {
             timeout: 10000,
         }
@@ -27,12 +20,12 @@ const _createPrismaInstance = (prismaOptions) => {
                     query,
                     operation,
                 };
-                const controller = typedi_1.default.get(events_1.DbEventController);
-                const beforeEvent = (0, events_1.generateEventString)(model, operation, events_1.PrismaEventOperation.Before);
+                const controller = Container.get(DbEventController);
+                const beforeEvent = generateEventString(model, operation, PrismaEventOperation.Before);
                 controller.emit(beforeEvent, payload);
                 let result = null;
                 try {
-                    const Args = await hooks_1.prismaHookRegistry.applyAll({
+                    const Args = await prismaHookRegistry.applyAll({
                         args,
                         operation,
                         model,
@@ -45,7 +38,7 @@ const _createPrismaInstance = (prismaOptions) => {
                         operation,
                         result,
                     };
-                    const afterEvent = (0, events_1.generateEventString)(model, operation, events_1.PrismaEventOperation.After);
+                    const afterEvent = generateEventString(model, operation, PrismaEventOperation.After);
                     controller.emit(afterEvent, afterPayload);
                 }
                 catch (e) {
@@ -75,5 +68,5 @@ const _createPrismaInstance = (prismaOptions) => {
     });
     return client;
 };
-exports._createPrismaInstance = _createPrismaInstance;
+export { client };
 //# sourceMappingURL=client.js.map

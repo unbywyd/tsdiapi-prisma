@@ -1,6 +1,6 @@
 import { Operation, PrismaOperation } from "@tsdiapi/prisma";
 import { Service } from "typedi";
-import { PrismaOperationArgs } from "@base/prisma.types";
+import type { PrismaOperationArgs } from "@base/prisma.types.js";
 import { Prisma } from "@prisma/client";
 
 @Service()

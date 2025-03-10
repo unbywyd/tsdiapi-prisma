@@ -1,6 +1,6 @@
 import { DbAfterListener, DbBeforeListener, PrismaOperation } from "@tsdiapi/prisma";
 import { Service } from "typedi";
-import { PrismaEventPayload } from "@base/prisma.types";
+import type { PrismaEventPayload } from "@base/prisma.types.js";
 import { Prisma } from "@prisma/client";
 
 @Service()

@@ -1,7 +1,7 @@
 import type { AppPlugin, AppContext } from '@tsdiapi/server';
-export * from './events';
-export * from './hooks';
-import { client } from './client';
+export * from './events.js';
+export * from './hooks.js';
+import { client } from './client.js';
 export { client };
 export type PluginOptions = {
     prismaOptions: any;

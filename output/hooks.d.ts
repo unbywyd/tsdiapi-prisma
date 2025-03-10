@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { PrismaHookPayload, PrismaOperation } from "./events";
+import { PrismaHookPayload, PrismaOperation } from "./events.js";
 declare class PrismaHookRegistry {
     private hooks;
     register(instance: any): void;
