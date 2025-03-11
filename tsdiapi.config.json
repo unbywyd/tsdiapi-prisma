@@ -6,17 +6,10 @@
     "required": true,
     "scripts": [
       {
-        "command": "ADD GENERATOR dto_generator ({ provider='node node_modules/prisma-class-dto-generator' output='../src/prisma-models' });",
-        "description": "Add Prisma class-DTO generator."
-      },
-      {
         "command": "ADD MODEL Tsdiapi ({version Int});",
         "description": "Add a sample Prisma model."
       }
     ]
-  },
-  "provideScripts": {
-    "postinstall": "prisma generate"
   },
   "variables": [
     {
