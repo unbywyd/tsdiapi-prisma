@@ -8,21 +8,19 @@ const defaultConfig = {
         transactionOptions: {
             timeout: 10000,
         }
-    },
-    autoloadGlobPath: "*.prisma{.ts,.js}"
+    }
 };
 class App {
     name = 'tsdiapi-prisma';
     config;
     context;
-    bootstrapFilesGlobPath;
     constructor(config) {
         this.config = { ...config };
-        this.bootstrapFilesGlobPath = this.config.autoloadGlobPath || defaultConfig.autoloadGlobPath;
         _createPrismaInstance(this.config.prismaOptions || defaultConfig);
     }
     async onInit(ctx) {
         this.context = ctx;
+        ctx.fastify.decorate('prisma', client);
     }
 }
 export default function (config) {

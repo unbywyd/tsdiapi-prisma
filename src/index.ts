@@ -4,10 +4,17 @@ export * from './events.js';
 export * from './hooks.js';
 import { client } from './client.js';
 export { client };
+import { FastifyInstance } from 'fastify';
+import { PrismaClient } from '@prisma/client';
+
+declare module "fastify" {
+    interface FastifyInstance {
+        prisma: PrismaClient;
+    }
+}
 
 export type PluginOptions = {
-    prismaOptions: any,
-    autoloadGlobPath: string;
+    prismaOptions: any
 }
 
 const defaultConfig: Partial<PluginOptions> = {
@@ -15,22 +22,19 @@ const defaultConfig: Partial<PluginOptions> = {
         transactionOptions: {
             timeout: 10000,
         }
-    },
-    autoloadGlobPath: "*.prisma{.ts,.js}"
+    }
 }
-
 class App implements AppPlugin {
     name = 'tsdiapi-prisma';
     config: PluginOptions;
     context: AppContext;
-    bootstrapFilesGlobPath: string;
     constructor(config?: PluginOptions) {
         this.config = { ...config };
-        this.bootstrapFilesGlobPath = this.config.autoloadGlobPath || defaultConfig.autoloadGlobPath;
         _createPrismaInstance(this.config.prismaOptions || defaultConfig);
     }
     async onInit(ctx: AppContext) {
         this.context = ctx;
+        ctx.fastify.decorate('prisma', client);
     }
 }
 

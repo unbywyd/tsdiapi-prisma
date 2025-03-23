@@ -30,16 +30,13 @@ export type PrismaEventPayload<M extends string, O extends PrismaOperation, Args
     model: M;
     result?: Result;
 };
-export type PrismaHookPayload<M extends string, O extends PrismaOperation, Args> = {
-    operation: O;
-    args: Args;
-    model: M;
-};
-export declare class DbEventController {
+declare class PrismaEventController {
     private listeners;
     on(event: string, callback: Function): void;
     emit(event: string, payload: any): void;
 }
-export declare function DbBeforeListener<M extends string, O extends PrismaOperation, Args>(model: M, operation: O): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function DbAfterListener<M extends string, O extends PrismaOperation, Args, Result>(model: M, operation: O): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
+export declare const prismaController: PrismaEventController;
+export declare function onBeforeHook<M extends string, O extends PrismaOperation, Args>(model: M, operation: O, handler: (payload: PrismaEventPayload<M, O, Args, any>) => void | Promise<void>): void;
+export declare function onAfterHook<M extends string, O extends PrismaOperation, Args, Result>(model: M, operation: O, handler: (payload: PrismaEventPayload<M, O, Args, Result>) => void | Promise<void>): void;
+export {};
 //# sourceMappingURL=events.d.ts.map

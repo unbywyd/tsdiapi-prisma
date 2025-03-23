@@ -1,17 +1,17 @@
 import { PrismaClient } from "@prisma/client";
-import { Container } from "typedi";
-import { DbEventController, generateEventString, PrismaEventOperation } from "./events.js";
+import { prismaController, generateEventString, PrismaEventOperation } from "./events.js";
 import { prismaHookRegistry } from "./hooks.js";
 let client = null;
 export const _createPrismaInstance = (prismaOptions) => {
     if (client) {
         return client;
     }
-    client = new PrismaClient({
+    const baseClient = new PrismaClient({
         transactionOptions: prismaOptions || {
             timeout: 10000,
         }
-    }).$extends({
+    });
+    client = baseClient.$extends({
         query: {
             $allOperations: async ({ model, operation, args, query }) => {
                 const payload = {
@@ -20,15 +20,15 @@ export const _createPrismaInstance = (prismaOptions) => {
                     query,
                     operation,
                 };
-                const controller = Container.get(DbEventController);
                 const beforeEvent = generateEventString(model, operation, PrismaEventOperation.Before);
-                controller.emit(beforeEvent, payload);
+                prismaController.emit(beforeEvent, payload);
                 let result = null;
                 try {
                     const Args = await prismaHookRegistry.applyAll({
                         args,
                         operation,
                         model,
+                        query
                     });
                     result = await query(Args);
                     const afterPayload = {
@@ -39,7 +39,7 @@ export const _createPrismaInstance = (prismaOptions) => {
                         result,
                     };
                     const afterEvent = generateEventString(model, operation, PrismaEventOperation.After);
-                    controller.emit(afterEvent, afterPayload);
+                    prismaController.emit(afterEvent, afterPayload);
                 }
                 catch (e) {
                     throw Error(e.message);

@@ -1,10 +1,3 @@
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-import { Service, Container } from "typedi";
 /** Possible Prisma operations */
 export var PrismaOperation;
 (function (PrismaOperation) {
@@ -34,7 +27,7 @@ export var PrismaEventOperation;
 export function generateEventString(modelName, operation, eventOperation) {
     return `db_${eventOperation}_${operation}_${modelName}`;
 }
-let DbEventController = class DbEventController {
+class PrismaEventController {
     listeners = new Map();
     on(event, callback) {
         if (!this.listeners.has(event)) {
@@ -49,29 +42,14 @@ let DbEventController = class DbEventController {
             callback(payload);
         }
     }
-};
-DbEventController = __decorate([
-    Service()
-], DbEventController);
-export { DbEventController };
-export function DbBeforeListener(model, operation) {
-    return function (target, propertyKey, descriptor) {
-        const originalMethod = descriptor.value;
-        const eventName = generateEventString(model, operation, PrismaEventOperation.Before);
-        Container.get(DbEventController).on(eventName, (payload) => {
-            const instance = Container.get(target.constructor);
-            return originalMethod.call(instance, payload);
-        });
-    };
 }
-export function DbAfterListener(model, operation) {
-    return function (target, propertyKey, descriptor) {
-        const originalMethod = descriptor.value;
-        const eventName = generateEventString(model, operation, PrismaEventOperation.After);
-        Container.get(DbEventController).on(eventName, (payload) => {
-            const instance = Container.get(target.constructor);
-            return originalMethod.call(instance, payload);
-        });
-    };
+export const prismaController = new PrismaEventController();
+export function onBeforeHook(model, operation, handler) {
+    const eventName = generateEventString(model, operation, PrismaEventOperation.Before);
+    prismaController.on(eventName, handler);
+}
+export function onAfterHook(model, operation, handler) {
+    const eventName = generateEventString(model, operation, PrismaEventOperation.After);
+    prismaController.on(eventName, handler);
 }
 //# sourceMappingURL=events.js.map

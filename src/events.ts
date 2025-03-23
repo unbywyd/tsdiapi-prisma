@@ -1,5 +1,3 @@
-import { Service, Container } from "typedi";
-
 /** Possible Prisma operations */
 export enum PrismaOperation {
     FindUnique = "findUnique",
@@ -50,18 +48,7 @@ export type PrismaEventPayload<
     result?: Result;
 };
 
-export type PrismaHookPayload<
-    M extends string,
-    O extends PrismaOperation,
-    Args
-> = {
-    operation: O;
-    args: Args;
-    model: M;
-};
-
-@Service()
-export class DbEventController {
+class PrismaEventController {
     private listeners: Map<string, Function[]> = new Map();
 
     public on(event: string, callback: Function): void {
@@ -79,43 +66,31 @@ export class DbEventController {
     }
 }
 
-export function DbBeforeListener<
+export const prismaController = new PrismaEventController();
+
+export function onBeforeHook<
     M extends string,
     O extends PrismaOperation,
     Args
->(model: M, operation: O) {
-    return function (
-        target: any,
-        propertyKey: string,
-        descriptor: PropertyDescriptor
-    ) {
-        const originalMethod = descriptor.value;
-        const eventName = generateEventString(model, operation, PrismaEventOperation.Before);
-
-        Container.get(DbEventController).on(eventName, (payload: PrismaEventPayload<M, O, Args, any>) => {
-            const instance = Container.get(target.constructor);
-            return originalMethod.call(instance, payload);
-        });
-    };
+>(
+    model: M,
+    operation: O,
+    handler: (payload: PrismaEventPayload<M, O, Args, any>) => void | Promise<void>
+) {
+    const eventName = generateEventString(model, operation, PrismaEventOperation.Before);
+    prismaController.on(eventName, handler);
 }
 
-export function DbAfterListener<
+export function onAfterHook<
     M extends string,
     O extends PrismaOperation,
     Args,
     Result
->(model: M, operation: O) {
-    return function (
-        target: any,
-        propertyKey: string,
-        descriptor: PropertyDescriptor
-    ) {
-        const originalMethod = descriptor.value;
-        const eventName = generateEventString(model, operation, PrismaEventOperation.After);
-
-        Container.get(DbEventController).on(eventName, (payload: PrismaEventPayload<M, O, Args, Result>) => {
-            const instance = Container.get(target.constructor);
-            return originalMethod.call(instance, payload);
-        });
-    };
+>(
+    model: M,
+    operation: O,
+    handler: (payload: PrismaEventPayload<M, O, Args, Result>) => void | Promise<void>
+) {
+    const eventName = generateEventString(model, operation, PrismaEventOperation.After);
+    prismaController.on(eventName, handler);
 }

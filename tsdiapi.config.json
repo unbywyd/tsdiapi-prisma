@@ -41,16 +41,6 @@
       }
     }
   ],
-  "files": [
-    {
-      "source": "files/prisma/*.*",
-      "destination": "prisma/"
-    },
-    {
-      "source": "files/src/*.ts",
-      "destination": "src/"
-    }
-  ],
   "generators": [
     {
       "name": "event",

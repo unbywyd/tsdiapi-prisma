@@ -1,48 +1,35 @@
-import "reflect-metadata";
-import { Service, Container } from "typedi";
-import { PrismaHookPayload, PrismaOperation } from "./events.js";
-
-const PRISMA_HOOKS_METADATA = Symbol("PRISMA_HOOKS_METADATA");
-const OPERATION_METADATA = Symbol("OPERATION_METADATA");
-
-@Service()
+import { PrismaOperation } from "./events.js";
+import { Prisma } from "@prisma/client";
+// @ts-ignore
+export type PrismaModelNames = keyof typeof Prisma.ModelName;
+// @ts-ignore
+export type PrismaOperationArgs<Model extends PrismaModelNames, Operation extends PrismaOperation> = Prisma.TypeMap["model"][Model]["operations"][Operation]["args"];
+// @ts-ignore
+export type PrismaOperationResults<Model extends PrismaModelNames, Operation extends PrismaOperation> = Prisma.TypeMap["model"][Model]["operations"][Operation]["result"];
+// @ts-ignore
+export type PrismaHookPayload<M extends PrismaModelNames, O extends PrismaOperation> = { operation: PrismaOperation; args: PrismaOperationArgs<M, O>; query: any; model: Prisma.ModelName; result?: PrismaOperationResults<M, O>; }
 class PrismaHookRegistry {
-    private hooks: any[] = [];
+    private hooks: Array<{ model: PrismaModelNames; operation: PrismaOperation; handler: Function }> = [];
 
-    public register(instance: any): void {
-        if (isPrismaHookInstance(instance)) {
-            this.hooks.push(instance);
-        }
+    public registerHook<M extends PrismaModelNames, O extends PrismaOperation>(
+        model: M,
+        operation: O,
+        handler: (args: PrismaOperationArgs<M, O>) => Promise<PrismaOperationArgs<M, O>>
+    ) {
+        this.hooks.push({ model, operation, handler });
     }
 
-    public async applyAll<
-        M extends string,
-        O extends PrismaOperation,
-        Args
-    >(
-        data: PrismaHookPayload<M, O, Args>
-    ): Promise<Args> {
+    public async applyAll<M extends PrismaModelNames, O extends PrismaOperation>(
+        data: PrismaHookPayload<M, O>
+    ): Promise<PrismaOperationArgs<M, O>> {
         let { args, operation, model } = data;
 
-        for (let hookInstance of this.hooks) {
-            const methods = Object.getOwnPropertyNames(
-                Object.getPrototypeOf(hookInstance)
-            );
-
-            for (let method of methods) {
-                const operationMetadata = getOperationMetadata(hookInstance, method);
-
-                if (operationMetadata) {
-                    const [operationType, modelName] = [
-                        operationMetadata.operation,
-                        operationMetadata.model,
-                    ];
-                    if (
-                        operationType === operation &&
-                        (!modelName || modelName === model)
-                    ) {
-                        args = await hookInstance[method].call(hookInstance, args);
-                    }
+        for (const hook of this.hooks) {
+            if (hook.operation === operation && hook.model === model) {
+                try {
+                    args = await hook.handler(args);
+                } catch (e) {
+                    console.error(e);
                 }
             }
         }
@@ -53,47 +40,14 @@ class PrismaHookRegistry {
 
 export const prismaHookRegistry = new PrismaHookRegistry();
 
-export function PrismaHooks(): ClassDecorator {
-    return (target: any) => {
-        Reflect.defineMetadata(PRISMA_HOOKS_METADATA, true, target);
-        const instance = Container.get(target);
-        prismaHookRegistry.register(instance);
-    };
-}
-
-export function Operation<
-    O extends PrismaOperation,
-    M extends string,
->(
-    operation: O,
-    model?: M
-): MethodDecorator {
-    return (target: any, propertyKey: string | symbol) => {
-        Reflect.defineMetadata(
-            OPERATION_METADATA,
-            { model, operation },
-            target,
-            propertyKey
-        );
-    };
-}
-
-function isPrismaHookInstance(obj: any): obj is object {
-    return Reflect.getMetadata(PRISMA_HOOKS_METADATA, obj.constructor);
-}
-
-function getOperationMetadata<
-    M extends string,
+export function usePrismaHook<
+    M extends PrismaModelNames,
     O extends PrismaOperation
 >(
-    instance: any,
-    propertyKey: string | symbol
-): {
-    model: M;
-    operation: O;
-} | null {
-    return Reflect.getMetadata(OPERATION_METADATA, instance, propertyKey) as {
-        model: M;
-        operation: O;
-    } | null;
+    model: M,
+    operation: O,
+    handler: (args: PrismaOperationArgs<M, O>) => Promise<PrismaOperationArgs<M, O>> | PrismaOperationArgs<M, O>
+) {
+    prismaHookRegistry.registerHook(model, operation, handler);
 }
+
