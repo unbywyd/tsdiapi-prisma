@@ -1,8 +1,7 @@
 import { _createPrismaInstance } from './client.js';
 export * from './events.js';
 export * from './hooks.js';
-import { client } from './client.js';
-export { client };
+let client = null;
 const defaultConfig = {
     prismaOptions: {
         transactionOptions: {
@@ -16,14 +15,19 @@ class App {
     context;
     constructor(config) {
         this.config = { ...config };
-        _createPrismaInstance(this.config.prismaOptions || defaultConfig);
     }
     async onInit(ctx) {
         this.context = ctx;
+        client = await _createPrismaInstance({
+            prismaOptions: this.config.prismaOptions || defaultConfig.prismaOptions,
+            customClient: this.config.client
+        });
         ctx.fastify.decorate('prisma', client);
     }
 }
-export default function (config) {
-    return new App(config);
+export default (config) => new App(config);
+export { client };
+export function usePrisma() {
+    return client;
 }
 //# sourceMappingURL=index.js.map

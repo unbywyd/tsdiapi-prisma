@@ -1,17 +1,30 @@
-import { PrismaClient } from "@prisma/client";
 import { prismaController, generateEventString, PrismaEventOperation } from "./events.js";
 import { prismaHookRegistry } from "./hooks.js";
-let client = null;
-export const _createPrismaInstance = (prismaOptions) => {
-    if (client) {
-        return client;
-    }
-    const baseClient = new PrismaClient({
-        transactionOptions: prismaOptions || {
-            timeout: 10000,
+export const _createPrismaInstance = async (options) => {
+    let client = null;
+    const { prismaOptions, customClient } = options;
+    if (customClient) {
+        if (typeof customClient === 'function' && customClient.prototype) {
+            client = new customClient({
+                transactionOptions: prismaOptions || {
+                    timeout: 10000,
+                }
+            });
         }
-    });
-    client = baseClient.$extends({
+        else {
+            client = customClient;
+        }
+    }
+    else {
+        // Fallback to @prisma/client for backward compatibility
+        const { PrismaClient } = await import('@prisma/client');
+        client = new PrismaClient({
+            transactionOptions: prismaOptions || {
+                timeout: 10000,
+            }
+        });
+    }
+    client = client.$extends({
         query: {
             $allOperations: async ({ model, operation, args, query }) => {
                 const payload = {
@@ -68,5 +81,4 @@ export const _createPrismaInstance = (prismaOptions) => {
     });
     return client;
 };
-export { client };
 //# sourceMappingURL=client.js.map

@@ -2,19 +2,17 @@ import type { AppPlugin, AppContext } from '@tsdiapi/server';
 import { _createPrismaInstance } from './client.js';
 export * from './events.js';
 export * from './hooks.js';
-import { client } from './client.js';
-export { client };
 import { FastifyInstance } from 'fastify';
-import { PrismaClient } from '@prisma/client';
-
+let client: any = null;
 declare module "fastify" {
     interface FastifyInstance {
-        prisma: PrismaClient;
+        prisma: any;
     }
 }
 
 export type PluginOptions = {
-    prismaOptions: any
+    prismaOptions?: any;
+    client: any;
 }
 
 const defaultConfig: Partial<PluginOptions> = {
@@ -24,20 +22,28 @@ const defaultConfig: Partial<PluginOptions> = {
         }
     }
 }
+
 class App implements AppPlugin {
     name = 'tsdiapi-prisma';
     config: PluginOptions;
     context: AppContext;
     constructor(config?: PluginOptions) {
         this.config = { ...config };
-        _createPrismaInstance(this.config.prismaOptions || defaultConfig);
     }
     async onInit(ctx: AppContext) {
         this.context = ctx;
+
+        client = await _createPrismaInstance({
+            prismaOptions: this.config.prismaOptions || defaultConfig.prismaOptions,
+            customClient: this.config.client
+        });
         ctx.fastify.decorate('prisma', client);
     }
 }
 
-export default function (config?: PluginOptions) {
-    return new App(config);
+export default (config?: PluginOptions) => new App(config);
+export { client };
+
+export function usePrisma<T = unknown>(): T {
+    return client as T;
 }
