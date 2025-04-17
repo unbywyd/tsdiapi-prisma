@@ -2,6 +2,13 @@
   "name": "@tsdiapi/prisma",
   "description": "A TSDIAPI plugin for database management using Prisma ORM.",
   "postInstall": "npx prisma init",
+  "registration": {
+    "pluginImportName": "PrismaPlugin",
+    "pluginArgs": "{ client: PrismaClient }",
+    "imports": [
+      "import { PrismaClient } from '@prismaGenerated/client.js'"
+    ]
+  },
   "prisma": {
     "required": true,
     "scripts": [
