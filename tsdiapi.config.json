@@ -6,7 +6,7 @@
     "pluginImportName": "PrismaPlugin",
     "pluginArgs": "{ client: PrismaClient }",
     "imports": [
-      "import { PrismaClient } from '@prismaGenerated/client.js'"
+      "import { PrismaClient } from '@generated/prisma/client.js'"
     ]
   },
   "prisma": {
@@ -15,6 +15,10 @@
       {
         "command": "ADD MODEL Tsdiapi ({version Int});",
         "description": "Add a sample Prisma model."
+      },
+      {
+        "command": "UPDATE GENERATOR client (output='../generated/prisma');",
+        "description": "Update the Prisma client generator."
       }
     ]
   },
