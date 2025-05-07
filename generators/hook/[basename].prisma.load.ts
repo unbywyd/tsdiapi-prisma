@@ -1,5 +1,5 @@
 import { PrismaOperation, usePrismaHook } from "@tsdiapi/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@generated/prisma/client.js";
 
 
 usePrismaHook(Prisma.ModelName['{{modelName}}'], PrismaOperation.{{operation}}, async (payload) => {

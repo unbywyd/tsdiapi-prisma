@@ -1,5 +1,5 @@
 import { PrismaOperation, onAfterHook, onBeforeHook } from "@tsdiapi/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@generated/prisma/client.js";
 
 
 onAfterHook(Prisma.ModelName['{{modelName}}'], PrismaOperation.{{operation}}, (payload) => {

@@ -167,7 +167,7 @@
   "postMessages": [
     "✅ Prisma setup complete!",
     "❗❗ Open 'prisma/schema.prisma' and define your models! ❗❗",
-    "📌 Use 'npx prisma generate' to regenerate the Prisma client.",
-    "⚡ Run 'npx prisma migrate dev' to apply migrations."
+    "⚡ Run 'prisma migrate dev' to apply migrations.",
+    "📌 Use 'npm run prisma:generate' to regenerate the Prisma client."
   ]
 }
