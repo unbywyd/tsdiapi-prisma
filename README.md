@@ -76,10 +76,12 @@ Add the plugin to your **TSDIAPI-Server** setup:
 ```typescript
 import { createApp } from "@tsdiapi/server";
 import prismaPlugin from "@tsdiapi/prisma";
+import { PrismaClient } from "@generated/prisma/client.js";
 
 createApp({
   plugins: [
     prismaPlugin({
+      client: PrismaClient,
       prismaOptions: {
         transactionOptions: { timeout: 15000 },
       },
@@ -88,15 +90,34 @@ createApp({
 });
 ```
 
+**Note**: The `client` parameter is required and should be your generated Prisma client.
+
 ### Access Prisma Client
 
-The Prisma client is available via the `client` export:
+You can access the Prisma client in several ways:
 
+**1. Via the `client` export:**
 ```typescript
 import { client } from "@tsdiapi/prisma";
 
 const users = await client.user.findMany();
 console.log(users);
+```
+
+**2. Via the `usePrisma()` function (recommended):**
+```typescript
+import { usePrisma } from "@tsdiapi/prisma";
+import { PrismaClient } from "@generated/prisma/client.js";
+
+const prisma = usePrisma<PrismaClient>();
+const users = await prisma.user.findMany();
+console.log(users);
+```
+
+**3. Via Fastify instance decoration:**
+```typescript
+// Inside your route handlers or plugins
+const users = await fastify.prisma.user.findMany();
 ```
 
 ---
@@ -105,25 +126,27 @@ console.log(users);
 
 ### Define Prisma Event Listeners
 
-Use decorators to respond to specific database events:
+Use functions to respond to specific database events:
 
 ```typescript
-import { DbAfterListener, PrismaOperation } from "@tsdiapi/prisma";
-import { Service } from "typedi";
+import { onBeforeHook, onAfterHook, PrismaOperation } from "@tsdiapi/prisma";
+import { Prisma } from "@generated/prisma/client.js";
 
-@Service()
-export class CustomEvents {
-  @DbAfterListener("User", PrismaOperation.Create)
-  public afterUserCreate(result: { args: any; result: any }) {
-    console.log(`User created with ID: ${result.result.id}`);
-  }
-}
+// Listen to events before a query
+onBeforeHook(Prisma.ModelName.User, PrismaOperation.Create, (payload) => {
+  console.log(`Before creating user:`, payload.args);
+});
+
+// Listen to events after a query
+onAfterHook(Prisma.ModelName.User, PrismaOperation.Create, (payload) => {
+  console.log(`User created with ID: ${payload.result.id}`);
+});
 ```
 
-Available decorators:
+Available functions:
 
-- **`DbBeforeListener(model, operation)`**: Triggered before a Prisma query.
-- **`DbAfterListener(model, operation)`**: Triggered after a query is executed.
+- **`onBeforeHook(model, operation, handler)`**: Triggered before a Prisma query.
+- **`onAfterHook(model, operation, handler)`**: Triggered after a query is executed.
 
 ---
 
@@ -132,18 +155,26 @@ Available decorators:
 Modify queries dynamically using hooks:
 
 ```typescript
-import { Operation, PrismaOperation } from "@tsdiapi/prisma";
-import { Service } from "typedi";
+import { usePrismaHook, PrismaOperation } from "@tsdiapi/prisma";
+import { Prisma } from "@generated/prisma/client.js";
 
-@Service()
-export class QueryHooks {
-  @Operation(PrismaOperation.Create, "User")
-  public modifyUserCreate(args: { data: any }) {
-    args.data.name = `Modified-${args.data.name}`;
-    return args; // Return the modified query arguments
-  }
-}
+// Register a hook to modify query arguments before execution
+usePrismaHook(Prisma.ModelName.User, PrismaOperation.Create, async (args) => {
+  // Modify the arguments before query execution
+  args.data.name = `Modified-${args.data.name}`;
+  args.data.createdAt = new Date();
+  
+  return args; // Return the modified query arguments
+});
+
+// Hooks can also be synchronous
+usePrismaHook(Prisma.ModelName.User, PrismaOperation.Update, (args) => {
+  args.data.updatedAt = new Date();
+  return args;
+});
 ```
+
+The `usePrismaHook` function allows you to intercept and modify query arguments before they are executed by Prisma.
 
 ---
 
@@ -151,8 +182,27 @@ export class QueryHooks {
 
 | Option             | Type     | Default Value         | Description                                 |
 | ------------------ | -------- | --------------------- | ------------------------------------------- |
-| `prismaOptions`    | `object` | `{}`                  | Options for Prisma Client (e.g., timeouts). |
-| `autoloadGlobPath` | `string` | `"*.prisma{.ts,.js}"` | Glob pattern for custom Prisma files.       |
+| `client`           | `any`    | **Required**          | Prisma Client class or instance to use.    |
+| `prismaOptions`    | `object` | `{ transactionOptions: { timeout: 10000 } }` | Options for Prisma Client configuration. |
+
+### Example Configuration
+
+```typescript
+import prismaPlugin from "@tsdiapi/prisma";
+import { PrismaClient } from "@generated/prisma/client.js";
+
+const plugin = prismaPlugin({
+  client: PrismaClient,
+  prismaOptions: {
+    transactionOptions: {
+      timeout: 15000, // 15 seconds
+      isolationLevel: 'ReadCommitted'
+    },
+    errorFormat: 'pretty',
+    log: ['query', 'info', 'warn', 'error']
+  }
+});
+```
 
 ---
 
@@ -170,28 +220,64 @@ Create a simple setup to modify and log Prisma queries:
 ```typescript
 import { createApp } from "@tsdiapi/server";
 import prismaPlugin from "@tsdiapi/prisma";
+import { PrismaClient } from "@generated/prisma/client.js";
 
 createApp({
-  plugins: [prismaPlugin()],
+  plugins: [
+    prismaPlugin({
+      client: PrismaClient,
+      prismaOptions: {
+        transactionOptions: { timeout: 10000 }
+      }
+    })
+  ],
 });
 ```
 
 Define hooks and listeners to customize database interactions:
 
 ```typescript
-@Service()
-export class UserEvents {
-  @Operation(PrismaOperation.Create, "User")
-  public logUserCreation(args: { data: any }) {
-    console.log("Creating user:", args.data);
-  }
+import { usePrismaHook, onBeforeHook, onAfterHook, PrismaOperation } from "@tsdiapi/prisma";
+import { Prisma } from "@generated/prisma/client.js";
 
-  @DbAfterListener("User", PrismaOperation.Create)
-  public afterUserCreated(result: { result: any }) {
-    console.log(`User created successfully: ${result.result.id}`);
-  }
-}
+// Hook to modify data before creation
+usePrismaHook(Prisma.ModelName.User, PrismaOperation.Create, (args) => {
+  console.log("Creating user:", args.data);
+  args.data.createdAt = new Date();
+  return args;
+});
+
+// Event listener after creation
+onAfterHook(Prisma.ModelName.User, PrismaOperation.Create, (payload) => {
+  console.log(`User created successfully: ${payload.result.id}`);
+});
 ```
+
+---
+
+## API Reference
+
+### Exported Functions
+
+- **`onBeforeHook(model, operation, handler)`**: Register a listener for events before Prisma operations.
+- **`onAfterHook(model, operation, handler)`**: Register a listener for events after Prisma operations.
+- **`usePrismaHook(model, operation, handler)`**: Register a hook to modify query arguments before execution.
+- **`usePrisma<T>()`**: Get the current Prisma client instance with type safety.
+
+### Exported Types
+
+- **`PrismaOperation`**: Enum containing all supported Prisma operations.
+- **`PrismaEventOperation`**: Enum for distinguishing before/after events.
+- **`PrismaEventPayload<M, O, Args, Result>`**: Type for event payload data.
+- **`PluginOptions`**: Configuration options for the plugin.
+
+### Available Operations
+
+The `PrismaOperation` enum includes:
+- `FindUnique`, `FindUniqueOrThrow`, `FindFirst`, `FindFirstOrThrow`, `FindMany`
+- `Create`, `CreateMany`, `Update`, `UpdateMany`
+- `Delete`, `DeleteMany`, `Upsert`
+- `Aggregate`, `GroupBy`, `Count`
 
 ---
 
