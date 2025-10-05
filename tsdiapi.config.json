@@ -17,7 +17,7 @@
         "description": "Add a sample Prisma model."
       },
       {
-        "command": "UPDATE GENERATOR client (output='../generated/prisma');",
+        "command": "UPDATE GENERATOR client (output='../src/generated/prisma', binaryTargets='[\"native\", \"debian-openssl-3.0.x\"]');",
         "description": "Update the Prisma client generator."
       }
     ]
