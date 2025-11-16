@@ -48,8 +48,14 @@ export type PrismaEventPayload<
     result?: Result;
 };
 
+// Type for global event handler that works for all models
+export type GlobalPrismaEventHandler<Args = any, Result = any> = (
+    payload: PrismaEventPayload<string, PrismaOperation, Args, Result>
+) => void | Promise<void>;
+
 class PrismaEventController {
     private listeners: Map<string, Function[]> = new Map();
+    private globalListeners: Map<string, Function[]> = new Map();
 
     public on(event: string, callback: Function): void {
         if (!this.listeners.has(event)) {
@@ -58,7 +64,36 @@ class PrismaEventController {
         this.listeners.get(event)!.push(callback);
     }
 
+    public onGlobal(operation: PrismaOperation | '*', eventType: PrismaEventOperation, callback: Function): void {
+        const key = `${eventType}_${operation}`;
+        if (!this.globalListeners.has(key)) {
+            this.globalListeners.set(key, []);
+        }
+        this.globalListeners.get(key)!.push(callback);
+    }
+
     public emit(event: string, payload: any): void {
+        // Emit global listeners first
+        const { operation, model } = payload;
+        const eventType = event.includes('_before_') ? PrismaEventOperation.Before : PrismaEventOperation.After;
+        
+        // Emit to wildcard global listeners
+        const wildcardKey = `${eventType}_*`;
+        if (this.globalListeners.has(wildcardKey)) {
+            for (const callback of this.globalListeners.get(wildcardKey)!) {
+                callback(payload);
+            }
+        }
+        
+        // Emit to operation-specific global listeners
+        const operationKey = `${eventType}_${operation}`;
+        if (this.globalListeners.has(operationKey)) {
+            for (const callback of this.globalListeners.get(operationKey)!) {
+                callback(payload);
+            }
+        }
+        
+        // Emit to model-specific listeners
         if (!this.listeners.has(event)) return;
         for (const callback of this.listeners.get(event)!) {
             callback(payload);
@@ -93,4 +128,40 @@ export function onAfterHook<
 ) {
     const eventName = generateEventString(model, operation, PrismaEventOperation.After);
     prismaController.on(eventName, handler);
+}
+
+// Global event listeners for all models - specific operation
+export function onBeforeHookForAll<Args = any>(
+    operation: PrismaOperation,
+    handler: GlobalPrismaEventHandler<Args, any>
+): void;
+// Global event listeners for all models - all operations
+export function onBeforeHookForAll<Args = any>(
+    operation: '*',
+    handler: GlobalPrismaEventHandler<Args, any>
+): void;
+// Implementation
+export function onBeforeHookForAll<Args = any>(
+    operation: PrismaOperation | '*',
+    handler: GlobalPrismaEventHandler<Args, any>
+) {
+    prismaController.onGlobal(operation, PrismaEventOperation.Before, handler);
+}
+
+// Global event listeners for all models - specific operation
+export function onAfterHookForAll<Args = any, Result = any>(
+    operation: PrismaOperation,
+    handler: GlobalPrismaEventHandler<Args, Result>
+): void;
+// Global event listeners for all models - all operations
+export function onAfterHookForAll<Args = any, Result = any>(
+    operation: '*',
+    handler: GlobalPrismaEventHandler<Args, Result>
+): void;
+// Implementation
+export function onAfterHookForAll<Args = any, Result = any>(
+    operation: PrismaOperation | '*',
+    handler: GlobalPrismaEventHandler<Args, Result>
+) {
+    prismaController.onGlobal(operation, PrismaEventOperation.After, handler);
 }

@@ -1,6 +1,7 @@
 import type { AppPlugin, AppContext } from '@tsdiapi/server';
 export * from './events.js';
 export * from './hooks.js';
+export * from './context.js';
 declare let client: any;
 declare module "fastify" {
     interface FastifyInstance {

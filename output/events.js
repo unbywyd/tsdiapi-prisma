@@ -29,13 +29,39 @@ export function generateEventString(modelName, operation, eventOperation) {
 }
 class PrismaEventController {
     listeners = new Map();
+    globalListeners = new Map();
     on(event, callback) {
         if (!this.listeners.has(event)) {
             this.listeners.set(event, []);
         }
         this.listeners.get(event).push(callback);
     }
+    onGlobal(operation, eventType, callback) {
+        const key = `${eventType}_${operation}`;
+        if (!this.globalListeners.has(key)) {
+            this.globalListeners.set(key, []);
+        }
+        this.globalListeners.get(key).push(callback);
+    }
     emit(event, payload) {
+        // Emit global listeners first
+        const { operation, model } = payload;
+        const eventType = event.includes('_before_') ? PrismaEventOperation.Before : PrismaEventOperation.After;
+        // Emit to wildcard global listeners
+        const wildcardKey = `${eventType}_*`;
+        if (this.globalListeners.has(wildcardKey)) {
+            for (const callback of this.globalListeners.get(wildcardKey)) {
+                callback(payload);
+            }
+        }
+        // Emit to operation-specific global listeners
+        const operationKey = `${eventType}_${operation}`;
+        if (this.globalListeners.has(operationKey)) {
+            for (const callback of this.globalListeners.get(operationKey)) {
+                callback(payload);
+            }
+        }
+        // Emit to model-specific listeners
         if (!this.listeners.has(event))
             return;
         for (const callback of this.listeners.get(event)) {
@@ -51,5 +77,13 @@ export function onBeforeHook(model, operation, handler) {
 export function onAfterHook(model, operation, handler) {
     const eventName = generateEventString(model, operation, PrismaEventOperation.After);
     prismaController.on(eventName, handler);
+}
+// Implementation
+export function onBeforeHookForAll(operation, handler) {
+    prismaController.onGlobal(operation, PrismaEventOperation.Before, handler);
+}
+// Implementation
+export function onAfterHookForAll(operation, handler) {
+    prismaController.onGlobal(operation, PrismaEventOperation.After, handler);
 }
 //# sourceMappingURL=events.js.map
