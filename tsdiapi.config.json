@@ -2,14 +2,19 @@
   "name": "@tsdiapi/prisma",
   "description": "A TSDIAPI plugin for database management using Prisma ORM with adapter support.",
   "postInstall": "npx prisma init",
+  "afterInstall": {
+    "command": "npx prisma init",
+    "when": "true"
+  },
   "registration": {
     "pluginImportName": "PrismaPlugin",
     "pluginArgs": "{ client: prismaClient, prismaOptions: { transactionOptions: { timeout: 15000 } } }",
     "imports": [
       "import { PrismaClient } from '@generated/prisma/client.js'",
       "import { PrismaPg } from '@prisma/adapter-pg'",
-      "import { Pool } from 'pg'",
-      "",
+      "import { Pool } from 'pg'"
+    ],
+    "code": [
       "/**",
       " * Create PrismaClient with adapter for Prisma 7.0+",
       " * ",
@@ -33,7 +38,6 @@
       "  const adapter = new PrismaPg(pool);",
       "  return new PrismaClient({ adapter });",
       "}",
-      "",
       "const prismaClient = createPrismaClient();"
     ]
   },
