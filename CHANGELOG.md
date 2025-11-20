@@ -1,53 +1,31 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [0.5.0] - 2025-11-20
 
-## [0.3.5] - 2024-11-16
+### Breaking Changes
+- **Prisma 7.0+ Adapter Support**: The plugin now requires Prisma 7.0+ with adapter configuration
+- Client must be instantiated with adapter (e.g., `PrismaPg`) instead of passing class
+- Added required peer dependencies: `@prisma/adapter-pg`, `pg`
 
 ### Added
-- **Request Context in Hooks**: Prisma hooks can now access the current Fastify request context
-  - New optional `request` parameter in `usePrismaHook` handlers
-  - `getRequest()` function to manually get current request context
-  - Uses AsyncLocalStorage for automatic context propagation
-  - Full backward compatibility - existing hooks work without changes
+- Support for PostgreSQL adapter (`@prisma/adapter-pg`)
+- New `prisma/prisma.config.ts` file generation for Prisma CLI configuration
+- Shadow database URL support for safe migrations
+- Improved configuration split between CLI and runtime
+- Updated TypeScript definitions for adapter-based client
 
-- **Global Hooks for All Models**: New `usePrismaHookForAll` function for cross-cutting concerns
-  - Apply hooks to all models with a single registration
-  - Support for `'*'` operation to catch all operations
-  - Handler receives model name for conditional logic
-  - Perfect for auditing, multi-tenancy, soft deletes
+### Changed
+- `registration` in `tsdiapi.config.json` now generates adapter-based client code
+- Updated README with Prisma 7.0+ adapter examples
+- Enhanced installation instructions with required dependencies
 
-- **Global Event Listeners**: New `onBeforeHookForAll` and `onAfterHookForAll` functions
-  - Listen to events across all models with a single registration
-  - Support for `'*'` operation to catch all operations
-  - Perfect for logging, monitoring, performance tracking
-  - Separate from hooks - events are read-only
+### Dependencies
+- Added `@prisma/adapter-pg` ^7.0.0 (peer dependency)
+- Added `pg` ^8.11.0 (peer dependency)
+- Added `@types/pg` ^8.10.0 (dev dependency)
 
-### Features
-- Multi-tenancy support through request context
-- User-based filtering and authorization
-- Request-aware audit logging
-- Automatic context isolation between concurrent requests
-- Global hooks for cross-cutting concerns
-- TypeScript support with proper overloads
+## [0.4.0] - Previous Release
 
-### Examples Added
-- Basic hook usage with request context
-- Multi-tenancy implementation
-- Audit logging with user tracking
-- Authorization patterns
-
-### Internal Changes
-- Added `context.ts` module for AsyncLocalStorage management
-- Updated hook registry to pass request context
-- Added Fastify `onRequest` hook for context setup
-- Improved TypeScript types for better IDE support
-
-## [0.3.4] - Previous Version
-
-### Features
-- Prisma Client Integration
-- Event System
-- Hook Support
-- Lifecycle Management
-- Configurable Options
+- Updated to support `@tsdiapi/server` v0.4.0
+- Updated Prisma dependencies to ^7.0.0
+- Updated Fastify to ^5.6.2

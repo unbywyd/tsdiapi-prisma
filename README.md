@@ -18,15 +18,26 @@
 
 ## Installation
 
+### Required Dependencies (Prisma 7.0+)
+
 ```bash
-npm install @tsdiapi/prisma
+npm install @tsdiapi/prisma @prisma/client @prisma/adapter-pg pg
+npm install --save-dev prisma @types/pg
 ```
 
-Or use the CLI to add the plugin:
+### Using TSDIAPI CLI
+
+Or use the CLI to add the plugin with all dependencies:
 
 ```bash
 tsdiapi plugins add prisma
 ```
+
+The CLI will:
+- Install all required packages
+- Create `prisma/prisma.config.ts` for CLI configuration
+- Set up the adapter-based client in `src/main.ts`
+- Configure environment variables (`DATABASE_URL`, `SHADOW_DATABASE_URL`)
 
 ### 📌 Code Generation
 
@@ -71,19 +82,36 @@ tsdiapi generate prisma hook
 
 ## Usage
 
-### Register the Plugin
+### Register the Plugin (Prisma 7.0+)
 
-Add the plugin to your **TSDIAPI-Server** setup:
+> **Important**: Prisma 7.0+ requires adapters for database connections. The plugin now uses PostgreSQL adapter by default.
+
+#### Basic Setup with Adapter
 
 ```typescript
 import { createApp } from "@tsdiapi/server";
 import prismaPlugin from "@tsdiapi/prisma";
 import { PrismaClient } from "@generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+
+// Create PrismaClient with adapter for Prisma 7.0+
+function createPrismaClient(): PrismaClient {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is not set");
+  }
+  const pool = new Pool({ connectionString: databaseUrl });
+  const adapter = new PrismaPg(pool);
+  return new PrismaClient({ adapter });
+}
+
+const prismaClient = createPrismaClient();
 
 createApp({
   plugins: [
     prismaPlugin({
-      client: PrismaClient,
+      client: prismaClient,  // Pass the instantiated client
       prismaOptions: {
         transactionOptions: { timeout: 15000 },
       },
@@ -92,7 +120,28 @@ createApp({
 });
 ```
 
-**Note**: The `client` parameter is required and should be your generated Prisma client.
+#### Prisma Configuration Split (Prisma 7.0+)
+
+1. **prisma/prisma.config.ts** - CLI configuration:
+```typescript
+import 'dotenv/config';
+import { defineConfig, env } from "prisma/config";
+
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
+  },
+  datasource: {
+    url: env("DATABASE_URL"),
+    shadowDatabaseUrl: env("SHADOW_DATABASE_URL"), // For safe migrations
+  },
+});
+```
+
+2. **src/main.ts** - Runtime client with adapter (shown above)
+
+**Note**: The runtime client does NOT read `prisma.config.ts`. Configuration is split between CLI commands and runtime.
 
 ### Access Prisma Client
 
@@ -437,7 +486,7 @@ async function someFunction() {
 
 | Option             | Type     | Default Value         | Description                                 |
 | ------------------ | -------- | --------------------- | ------------------------------------------- |
-| `client`           | `any`    | **Required**          | Prisma Client class or instance to use.    |
+| `client`           | `any`    | **Required**          | Prisma Client instance with adapter (Prisma 7.0+) |
 | `prismaOptions`    | `object` | `{ transactionOptions: { timeout: 10000 } }` | Options for Prisma Client configuration. |
 
 ### Example Configuration
@@ -445,16 +494,25 @@ async function someFunction() {
 ```typescript
 import prismaPlugin from "@tsdiapi/prisma";
 import { PrismaClient } from "@generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+
+// Create client with adapter (Prisma 7.0+)
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prismaClient = new PrismaClient({ 
+  adapter,
+  errorFormat: 'pretty',
+  log: ['query', 'info', 'warn', 'error']
+});
 
 const plugin = prismaPlugin({
-  client: PrismaClient,
+  client: prismaClient,
   prismaOptions: {
     transactionOptions: {
       timeout: 15000, // 15 seconds
       isolationLevel: 'ReadCommitted'
-    },
-    errorFormat: 'pretty',
-    log: ['query', 'info', 'warn', 'error']
+    }
   }
 });
 ```

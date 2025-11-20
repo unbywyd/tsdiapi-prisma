@@ -1,14 +1,47 @@
 {
   "name": "@tsdiapi/prisma",
-  "description": "A TSDIAPI plugin for database management using Prisma ORM.",
+  "description": "A TSDIAPI plugin for database management using Prisma ORM with adapter support.",
   "postInstall": "npx prisma init",
   "registration": {
     "pluginImportName": "PrismaPlugin",
-    "pluginArgs": "{ client: PrismaClient }",
+    "pluginArgs": "{ client: prismaClient, prismaOptions: { transactionOptions: { timeout: 15000 } } }",
     "imports": [
-      "import { PrismaClient } from '@generated/prisma/client.js'"
+      "import { PrismaClient } from '@generated/prisma/client.js'",
+      "import { PrismaPg } from '@prisma/adapter-pg'",
+      "import { Pool } from 'pg'",
+      "",
+      "/**",
+      " * Create PrismaClient with adapter for Prisma 7.0+",
+      " * ",
+      " * IMPORTANT: Configuration split in Prisma 7:",
+      " * 1. prisma.config.ts - Used ONLY by Prisma CLI commands:",
+      " *    - DATABASE_URL: for migrations, studio, db push/pull",
+      " *    - shadowDatabaseUrl: ONLY for 'prisma migrate' (creates temp DB for testing migrations)",
+      " * ",
+      " * 2. This runtime client:",
+      " *    - Does NOT read prisma.config.ts",
+      " *    - Does NOT need shadowDatabaseUrl (that's only for migrations)",
+      " *    - Only needs main DATABASE_URL for actual database connections",
+      " *    - Must explicitly create adapter (required in Prisma 7)",
+      " */",
+      "function createPrismaClient(): PrismaClient {",
+      "  const databaseUrl = process.env.DATABASE_URL;",
+      "  if (!databaseUrl) {",
+      "    throw new Error('DATABASE_URL is not set');",
+      "  }",
+      "  const pool = new Pool({ connectionString: databaseUrl });",
+      "  const adapter = new PrismaPg(pool);",
+      "  return new PrismaClient({ adapter });",
+      "}",
+      "",
+      "const prismaClient = createPrismaClient();"
     ]
   },
+  "requiredPackages": [
+    "@prisma/client",
+    "@prisma/adapter-pg",
+    "pg"
+  ],
   "prisma": {
     "required": true,
     "scripts": [
@@ -49,6 +82,18 @@
       "inquirer": {
         "message": "Enter your database connection string:",
         "required": true
+      }
+    },
+    {
+      "name": "SHADOW_DATABASE_URL",
+      "type": "string",
+      "default": "",
+      "configurable": true,
+      "description": "Shadow database connection string for safe migrations (optional)",
+      "inquirer": {
+        "message": "Enter your shadow database URL (optional, for migrations):",
+        "required": false,
+        "when": "DATABASE_TYPE === 'PostgreSQL' || DATABASE_TYPE === 'MySQL'"
       }
     }
   ],
@@ -165,9 +210,13 @@
     }
   ],
   "postMessages": [
-    "✅ Prisma setup complete!",
+    "✅ Prisma setup complete with adapter support!",
+    "❗ IMPORTANT: Prisma 7.0+ requires adapters for database connections",
+    "📝 Configuration files:",
+    "  - prisma/prisma.config.ts - CLI configuration (migrations, studio)",
+    "  - src/main.ts - Runtime client with adapter",
     "❗❗ Open 'prisma/schema.prisma' and define your models! ❗❗",
-    "⚡ Run 'prisma migrate dev' to apply migrations.",
-    "📌 Use 'npm run prisma:generate' to regenerate the Prisma client."
+    "⚡ Run 'npm run prisma:generate' to regenerate the Prisma client.",
+    "🔄 Run 'npm run prisma:migrate' to apply migrations."
   ]
 }
